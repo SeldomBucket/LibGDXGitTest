@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class Bucket {
 	private float xVelocity, yVelocity;
 	private Rectangle box;
-	private float maxVelocity = 300;
+	private float maxVelocity = 500;
 	private String testagain = "howzis?", testing = "howzat?";
 	public Bucket(){
 		xVelocity = 0;
@@ -22,12 +22,12 @@ public class Bucket {
 	public void changeXVelocity(float velocity){
 		xVelocity += velocity;
 		if (xVelocity > maxVelocity) xVelocity = maxVelocity;
-		if (xVelocity < 0 -  maxVelocity) xVelocity = 0 -  maxVelocity;
+		if (xVelocity < -maxVelocity) xVelocity = -maxVelocity;
 	}
 	public void setXVelocity(float velocity){
 		xVelocity = velocity;
 		if (xVelocity > maxVelocity) xVelocity = maxVelocity;
-		if (xVelocity < 0 - maxVelocity) xVelocity = 0 - maxVelocity;
+		if (xVelocity < -maxVelocity) xVelocity = -maxVelocity;
 	}
 	public float getYVelocity(){
 		return yVelocity;
@@ -35,12 +35,12 @@ public class Bucket {
 	public void changeYVelocity(float velocity){
 		yVelocity += velocity;
 		if (yVelocity > maxVelocity) yVelocity = maxVelocity;
-		if (yVelocity < 0 - maxVelocity) yVelocity = 0 - maxVelocity;
+		if (yVelocity < -maxVelocity) yVelocity = -maxVelocity;
 	}
 	public void setYVelocity(float velocity){
 		yVelocity = velocity;
 		if (yVelocity > maxVelocity) yVelocity = maxVelocity;
-		if (yVelocity < 0 - maxVelocity) yVelocity = 0 - maxVelocity;
+		if (yVelocity < -maxVelocity) yVelocity = -maxVelocity;
 	}
 	public float getX(){
 		return box.x;

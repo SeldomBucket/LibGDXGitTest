@@ -15,8 +15,8 @@ public class MyGdxGame extends ApplicationAdapter {
 	private Texture dropImage, bucketImage;
 	private OrthographicCamera camera;
 	private Bucket bucket;
-	private BitmapFont font;
-	private float accel = 2000, decel = 1000;
+	private BitmapFont xVal, yVal, fps;
+	private float accel = 3000, decel = 2000, switchVel = 127;
 	
 	@Override
 	public void create () {
@@ -24,10 +24,14 @@ public class MyGdxGame extends ApplicationAdapter {
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
 		bucketImage = new Texture(Gdx.files.internal("bucket.png"));
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 800, 400);
+		camera.setToOrtho(false, 1920, 1080);
 		bucket = new Bucket();
-        font = new BitmapFont();
-        font.setColor(Color.RED);
+        xVal = new BitmapFont();
+        xVal.setColor(Color.RED);
+        yVal = new BitmapFont();
+        yVal.setColor(Color.GREEN);
+        fps = new BitmapFont();
+        fps.setColor(Color.WHITE);
 	}
 
 	@Override
@@ -37,75 +41,42 @@ public class MyGdxGame extends ApplicationAdapter {
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.draw(bucketImage, bucket.getX(), bucket.getY());
-		font.draw(batch, "HelloWorld", 800/2-60, 200);
+		xVal.draw(batch, "X Velocity: " + String.valueOf(bucket.getXVelocity()), 1920/2-60, 300);
+		yVal.draw(batch, "Y Velocity: " + String.valueOf(bucket.getYVelocity()), 1920/2-60, 200);
+		fps.draw(batch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 1080-60);
 		batch.end();
 		bucketMovement();
 	}
 	
 	private void bucketMovement(){
-		if(Gdx.input.isKeyPressed(Keys.A)) {
-			if (bucket.getXVelocity() > 50){
-				bucket.setXVelocity(50);
-			}
-			bucket.changeXVelocity(-accel*Gdx.graphics.getDeltaTime());
-			checkEdgeCollision();
-		}else if(Gdx.input.isKeyPressed(Keys.D)) {
-			if (bucket.getXVelocity() < -50){
-				bucket.setXVelocity(-50);
-			}
-			bucket.changeXVelocity(accel*Gdx.graphics.getDeltaTime());
-			checkEdgeCollision();
+		if(Gdx.input.isKeyPressed(Keys.D) && Gdx.input.isKeyPressed(Keys.A)){
+			decelXToStop();
 		}else{
-			if(!Gdx.input.isKeyPressed(Keys.A)){
-				if (bucket.getXVelocity() > 0){
-					bucket.changeXVelocity(-decel*Gdx.graphics.getDeltaTime());
-					if (bucket.getXVelocity() < 0){
-						bucket.setXVelocity(0);
-					}
-				}
+			if(Gdx.input.isKeyPressed(Keys.D)) {
+				bucket.changeXVelocity(accel*Gdx.graphics.getDeltaTime());
+				checkEdgeCollision();
 			}
-			if(!Gdx.input.isKeyPressed(Keys.D)){
-				if (bucket.getXVelocity() < 0){
-					bucket.changeXVelocity(decel*Gdx.graphics.getDeltaTime());
-					if (bucket.getXVelocity() > 0){
-						bucket.setXVelocity(0);
-					}
-				}
+			if(Gdx.input.isKeyPressed(Keys.A)) {
+				bucket.changeXVelocity((-accel)*Gdx.graphics.getDeltaTime());
+				checkEdgeCollision();
+			}
+			if(!Gdx.input.isKeyPressed(Keys.D) && !Gdx.input.isKeyPressed(Keys.A)){
+				decelXToStop();
 			}
 		}
-		
-		if(Gdx.input.isKeyPressed(Keys.W)) {
-			if (bucket.getYVelocity() < -50){
-				bucket.setYVelocity(-50);
-			}
-			bucket.changeYVelocity(accel*Gdx.graphics.getDeltaTime());
-			checkEdgeCollision();
-			if(Gdx.input.isKeyPressed(Keys.S)){
-				bucket.setYVelocity(0);
-			}
+		if(Gdx.input.isKeyPressed(Keys.W) && Gdx.input.isKeyPressed(Keys.S)){
+			decelYToStop();
 		}else{
-			if (bucket.getYVelocity() > 0){
-				bucket.changeYVelocity(-decel*Gdx.graphics.getDeltaTime());
-				if (bucket.getYVelocity() < 0){
-					bucket.setYVelocity(0);
-				}
+			if(Gdx.input.isKeyPressed(Keys.W)) {
+				bucket.changeYVelocity(accel*Gdx.graphics.getDeltaTime());
+				checkEdgeCollision();
 			}
-		}
-		if(Gdx.input.isKeyPressed(Keys.S)) {
-			if (bucket.getYVelocity() > 50){
-				bucket.setYVelocity(50);
+			if(Gdx.input.isKeyPressed(Keys.S)) {
+				bucket.changeYVelocity((-accel)*Gdx.graphics.getDeltaTime());
+				checkEdgeCollision();
 			}
-			bucket.changeYVelocity(-accel*Gdx.graphics.getDeltaTime());
-			checkEdgeCollision();
-			if(Gdx.input.isKeyPressed(Keys.W)){
-				bucket.setYVelocity(0);
-			}
-		}else{
-			if (bucket.getYVelocity() < 0){
-				bucket.changeYVelocity(decel*Gdx.graphics.getDeltaTime());
-				if (bucket.getYVelocity() > 0){
-					bucket.setYVelocity(0);
-				}
+			if(!Gdx.input.isKeyPressed(Keys.W) && !Gdx.input.isKeyPressed(Keys.S)){
+				decelYToStop();
 			}
 		}
 		if(Gdx.input.isKeyPressed(Keys.SPACE)) {
@@ -118,8 +89,40 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 	private void checkEdgeCollision(){
 		if(bucket.getX() < 0) {bucket.setX(0); bucket.setXVelocity(0);}
-		if(bucket.getX() > 800 - 64) {bucket.setX(800-64); bucket.setXVelocity(0);}
+		if(bucket.getX() > 1920 - 64) {bucket.setX(1920-64); bucket.setXVelocity(0);}
 		if(bucket.getY() < 0) {bucket.setY(0); bucket.setYVelocity(0);}
-		if(bucket.getY() > 400 - 64) {bucket.setY(400-64); bucket.setYVelocity(0);}
+		if(bucket.getY() > 1080 - 64) {bucket.setY(1080-64); bucket.setYVelocity(0);}
+	}
+	private void decelXToStop(){
+		if (bucket.getXVelocity() > 0){
+			if (bucket.getXVelocity() - decel*Gdx.graphics.getDeltaTime() < 0){
+				bucket.setXVelocity(0);
+			}else{
+				bucket.changeXVelocity(-decel*Gdx.graphics.getDeltaTime());
+			}
+		}
+		if (bucket.getXVelocity() < 0){
+			if (bucket.getXVelocity() + decel*Gdx.graphics.getDeltaTime() > 0){
+				bucket.setXVelocity(0);
+			}else{
+				bucket.changeXVelocity(decel*Gdx.graphics.getDeltaTime());
+			}
+		}
+	}
+	private void decelYToStop(){
+		if (bucket.getYVelocity() > 0){
+			if (bucket.getYVelocity() - decel*Gdx.graphics.getDeltaTime() < 0){
+				bucket.setYVelocity(0);
+			}else{
+				bucket.changeYVelocity(-decel*Gdx.graphics.getDeltaTime());
+			}
+		}
+		if (bucket.getYVelocity() < 0){
+			if (bucket.getYVelocity() + decel*Gdx.graphics.getDeltaTime() > 0){
+				bucket.setYVelocity(0);
+			}else{
+				bucket.changeYVelocity(decel*Gdx.graphics.getDeltaTime());
+			}
+		}
 	}
 }
